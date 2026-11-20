@@ -1,7 +1,8 @@
 # ExpressAI External API Dokümantasyonu
 
 > **Desteklenen Entegrasyonlar**  
-> Şu anda yalnızca **Trendyol Pazaryeri Siparişleri** ve **Kolay Gelsin Kargo** firması barkodları desteklenmektedir.
+> **Trendyol pazaryeri siparişleri** ve **Kolay Gelsin** barkodları desteklenir. Kolay Gelsin `pdf`, `image`, `rawJson` ve `zpl` üretmeye devam eder.  
+> **DHL eCommerce** siparişinde barkod etiketten ayrıştırılmaz. Görsel doğrudan ZPL'den üretilir ve dosya yolu `base64BarcodePath` alanına yazılır. Bu siparişlerde `pdf`, `image` ve `zpl` döner; `rawJson` üretilmez.
 
 ExpressAI barkod API'sini kullanarak sipariş barkodlarınızı programatik olarak alın. PDF, görsel, JSON veya ZPL formatlarında.
 
@@ -54,6 +55,8 @@ POST https://expressai.com.tr/api/external-barcodes/{accountId}
 | `image` | Her barkod için ayrı görsel içeren ZIP dosyası |
 | `rawJson` | Parse edilmiş kargo bilgileri (JSON formatında) |
 | `zpl` | Ham ZPL kodları (Zebra yazıcılar için) |
+
+**DHL eCommerce:** Barkod etiketten ayrıştırılmaz. Görsel doğrudan ZPL'den üretilir ve dosya yolu `base64BarcodePath` alanına yazılır. Bu siparişlerde `pdf`, `image` ve `zpl` döner; `rawJson` üretilmez. Kolay Gelsin siparişlerinde `pdf`, `image`, `rawJson` ve `zpl` aynı şekilde çalışmaya devam eder.
 
 ## Response Formatları
 
