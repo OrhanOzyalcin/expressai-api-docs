@@ -1,20 +1,24 @@
 # ExpressAI External API Dokümantasyonu
 
-> **Desteklenen Entegrasyonlar**  
-> External Barkod API, ExpressAI veritabanındaki **Kolay Gelsin**, **DHL eCommerce**, **Yurtiçi** ve **HepsiJet** barkodlarını döner.  
-> **Kolay Gelsin** `pdf`, `image`, `rawJson` ve `zpl` üretir.  
-> **DHL eCommerce** siparişinde barkod etiketten ayrıştırılmaz. Görsel doğrudan ZPL'den üretilir ve dosya yolu `base64BarcodePath` alanına yazılır. Bu siparişlerde `pdf`, `image` ve `zpl` döner; `rawJson` üretilmez.  
-> **Yurtiçi** siparişinde de etiket ayrıştırılmaz. Görsel ZPL'den birleşik etiket olarak üretilir ve yolu `base64BarcodePath` alanına yazılır. `pdf`, `image` ve `zpl` döner; `rawJson` üretilmez. Yurtiçi yalnızca bu External Barkod API'dedir.  
-> **HepsiJet** siparişinde etiket JPG olarak gelir, ayrıştırılmaz ve ZPL üretilmez. Görsel birleştirilip yolu `base64BarcodePath` alanına yazılır. `pdf` ve `image` döner; `rawJson` ve `zpl` üretilmez. HepsiJet yalnızca bu External Barkod API'dedir.
+ExpressAI veritabanındaki barkodları programatik olarak alın. Hangi çıktının döneceği kargoya göre değişir.
 
-ExpressAI barkod API'sini kullanarak sipariş barkodlarınızı programatik olarak alın. PDF, görsel, JSON veya ZPL formatlarında.
+## Desteklenen barkodlar
+
+| Kargo | pdf | image | rawJson | zpl | Not |
+|-------|-----|-------|---------|-----|-----|
+| Kolay Gelsin | var | var | var | var | Etiket alanları ayrıştırılır. |
+| DHL eCommerce | var | var | yok | var | Görsel doğrudan ZPL'den üretilir. |
+| Yurtiçi | var | var | yok | var | Görsel ZPL'den birleşik etikettir. |
+| HepsiJet | var | var | yok | yok | Etiket JPG olarak gelir. ZPL üretilmez. |
+
+`rawJson` veya `zpl` bu kargoda yoksa `pdf` ya da `image` isteyin. Aynı tipi tekrar denemeyin.
 
 ## Özellikler
 
 | Özellik | Açıklama |
 |---------|----------|
 | **Hızlı Entegrasyon** | Tek bir API çağrısı ile 500'e kadar barkodu aynı anda alın |
-| **Çoklu Format** | PDF, görsel (ZIP), JSON veya ZPL formatlarında çıktı alın |
+| **Çıktı** | Kargo tablosundaki tipler. Hepsi her kargoda dönmez. |
 | **Güvenli Erişim** | API Key ve Secret ile güvenli kimlik doğrulama |
 
 ## Başlarken
@@ -59,7 +63,7 @@ POST https://expressai.com.tr/api/external-barcodes/{accountId}
 | `rawJson` | Parse edilmiş kargo bilgileri (JSON formatında) |
 | `zpl` | Ham ZPL kodları (Zebra yazıcılar için) |
 
-**Kolay Gelsin** `pdf`, `image`, `rawJson` ve `zpl` üretir. **DHL eCommerce** barkodu etiketten ayrıştırılmaz; görsel doğrudan ZPL'den üretilir ve dosya yolu `base64BarcodePath` alanına yazılır. `pdf`, `image` ve `zpl` döner, `rawJson` üretilmez. **Yurtiçi** barkodu da ayrıştırılmaz; görsel ZPL'den birleşik etiket olarak üretilir ve yolu `base64BarcodePath` alanına yazılır. `pdf`, `image` ve `zpl` döner, `rawJson` üretilmez. Yurtiçi yalnızca External Barkod API'dedir. **HepsiJet** etiketi JPG olarak gelir, ayrıştırılmaz ve ZPL üretilmez. Görsel birleştirilip yolu `base64BarcodePath` alanına yazılır. `pdf` ve `image` döner; `rawJson` ve `zpl` üretilmez. HepsiJet yalnızca External Barkod API'dedir.
+Hangi tipin döneceği [Desteklenen barkodlar](#desteklenen-barkodlar) tablosundadır.
 
 ## Response Formatları
 
@@ -196,20 +200,110 @@ GET https://expressai.com.tr{downloadUrl}
 
 > ⚠️ **Önemli:** İndirme bağlantıları **1 saat** geçerlidir. Süre dolduktan sonra erişilemez.
 
-## Hata Kodları
+## Hata yanıtları
 
-| Kod | Açıklama |
-|-----|----------|
-| `INVALID_API_KEY` | Geçersiz API Key |
-| `INVALID_API_SECRET` | Geçersiz API Secret |
-| `CONNECTION_DISABLED` | Bağlantı pasif durumda |
-| `RATE_LIMIT_EXCEEDED` | Rate limit aşıldı (100 istek/dk) |
-| `INSUFFICIENT_CREDITS` | Yetersiz kredi bakiyesi |
-| `NO_PRINTABLE_ORDERS` | Yazdırılabilir sipariş yok |
-| `NO_JSON_DATA` | rawJson verisi olan sipariş yok |
-| `NO_ZPL_DATA` | ZPL verisi olan sipariş yok |
-| `DOWNLOAD_EXPIRED` | İndirme bağlantısının süresi dolmuş |
-| `FILE_NOT_FOUND` | Dosya bulunamadı |
+Başarılı cevap HTTP `200` döner. `errors` ve `errorRefs` dolu olabilir. Bu, isteğin tamamının başarısız olduğu anlamına gelmez; yalnızca listedeki referanslar atlanmıştır.
+
+Her kodun gövdesi aşağıdaki şekillerden biridir.
+
+### Şekil A — kod ve mesaj
+
+`INVALID_API_KEY`, `INVALID_API_SECRET`, `CONNECTION_DISABLED`, `ACCOUNT_MISMATCH`, `INTERNAL_ERROR`, `INVALID_FILE_ID`, `FILE_NOT_FOUND`.
+
+```json
+{
+  "success": false,
+  "error": "Geçersiz API Key",
+  "code": "INVALID_API_KEY"
+}
+```
+
+`INSUFFICIENT_CREDITS` aynı şekildedir. Gövdeye `shortages` dizisi de eklenebilir.
+
+### Şekil B — doğrulama
+
+```json
+{
+  "success": false,
+  "error": "Geçersiz istek formatı",
+  "code": "VALIDATION_ERROR",
+  "details": []
+}
+```
+
+### Şekil C — hız sınırı
+
+```json
+{
+  "success": false,
+  "error": "Rate limit aşıldı. Dakikada maksimum 100 istek yapabilirsiniz.",
+  "code": "RATE_LIMIT_EXCEEDED",
+  "retryAfter": 42
+}
+```
+
+Yanıtta `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining` ve `X-RateLimit-Reset` header'ları da bulunur.
+
+### Şekil D — boş sonuç
+
+`NO_PRINTABLE_ORDERS`, `NO_JSON_DATA`, `NO_ZPL_DATA`.
+
+```json
+{
+  "success": false,
+  "error": "JSON verisi olan sipariş bulunamadı",
+  "code": "NO_JSON_DATA",
+  "totalCount": 2,
+  "successCount": 0,
+  "tokenUsed": 0,
+  "tokenBalance": 148,
+  "errors": ["REF001: Barkod JSON verisi bulunamadı"],
+  "errorRefs": ["REF001"]
+}
+```
+
+### Şekil E — üretim hatası
+
+```json
+{
+  "success": false,
+  "error": "PDF oluşturulamadı",
+  "code": "PDF_GENERATION_FAILED",
+  "errors": []
+}
+```
+
+### Şekil F — süresi dolmuş indirme
+
+```json
+{
+  "success": false,
+  "error": "İndirme bağlantısının süresi dolmuş",
+  "code": "DOWNLOAD_EXPIRED",
+  "expiredAt": "2024-12-23T16:30:00.000Z"
+}
+```
+
+### Kodlar
+
+| Kod | HTTP | Gövde | İstemci |
+|-----|------|-------|---------|
+| `VALIDATION_ERROR` | 400 | B | Gövdeyi düzeltin. Aynı isteği tekrarlamayın. |
+| `INVALID_API_KEY` | 401 | A | Anahtarı düzeltin. Aynı kimlikle tekrarlamayın. |
+| `INVALID_API_SECRET` | 401 | A | Secret'ı düzeltin. Aynı kimlikle tekrarlamayın. |
+| `CONNECTION_DISABLED` | 401 | A | Bağlantı panelde kapalıdır. Açılmadan tekrarlamayın. |
+| `ACCOUNT_MISMATCH` | 403 | A | URL'deki `accountId` anahtarın hesabı değil. URL'yi düzeltin. |
+| `RATE_LIMIT_EXCEEDED` | 429 | C | `Retry-After` kadar bekleyip aynı isteği yeniden gönderin. |
+| `INSUFFICIENT_CREDITS` | 400 | A | Kredi ekleyin. Döngüye girmeyin. |
+| `NO_PRINTABLE_ORDERS` | 400 | D | `errors` içindeki referansların barkodu yok. Barkod oluşunca yeniden isteyin. |
+| `NO_JSON_DATA` | 400 | D | Bu siparişlerde `rawJson` yok. `pdf` veya `image` isteyin. |
+| `NO_ZPL_DATA` | 400 | D | Bu siparişlerde `zpl` yok. `pdf` veya `image` isteyin. |
+| `PDF_GENERATION_FAILED` | 500 | E | Kısa aralıklarla sınırlı tekrar deneyin. |
+| `ZIP_GENERATION_FAILED` | 500 | E | Kısa aralıklarla sınırlı tekrar deneyin. |
+| `INTERNAL_ERROR` | 500 | A | Kısa aralıklarla sınırlı tekrar deneyin. |
+| `INVALID_FILE_ID` | 400 | A | İndirme adresi bozuk. Aynı adresi tekrarlamayın. |
+| `FILE_NOT_FOUND` | 404 | A | Dosya yok. Barkod isteğini yenileyip yeni `downloadUrl` alın. |
+| `DOWNLOAD_EXPIRED` | 410 | F | Süre dolmuş. Barkod isteğini yenileyip yeni `downloadUrl` alın. |
 
 ## Rate Limiting
 
