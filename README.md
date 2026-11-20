@@ -1,8 +1,10 @@
 # ExpressAI External API Dokümantasyonu
 
 > **Desteklenen Entegrasyonlar**  
-> **Trendyol pazaryeri siparişleri** ve **Kolay Gelsin** barkodları desteklenir. Kolay Gelsin `pdf`, `image`, `rawJson` ve `zpl` üretmeye devam eder.  
-> **DHL eCommerce** siparişinde barkod etiketten ayrıştırılmaz. Görsel doğrudan ZPL'den üretilir ve dosya yolu `base64BarcodePath` alanına yazılır. Bu siparişlerde `pdf`, `image` ve `zpl` döner; `rawJson` üretilmez.
+> External Barkod API, ExpressAI veritabanındaki **Kolay Gelsin**, **DHL eCommerce** ve **Yurtiçi** barkodlarını döner.  
+> **Kolay Gelsin** `pdf`, `image`, `rawJson` ve `zpl` üretir.  
+> **DHL eCommerce** siparişinde barkod etiketten ayrıştırılmaz. Görsel doğrudan ZPL'den üretilir ve dosya yolu `base64BarcodePath` alanına yazılır. Bu siparişlerde `pdf`, `image` ve `zpl` döner; `rawJson` üretilmez.  
+> **Yurtiçi** siparişinde de etiket ayrıştırılmaz. Görsel ZPL'den birleşik etiket olarak üretilir ve yolu `base64BarcodePath` alanına yazılır. `pdf`, `image` ve `zpl` döner; `rawJson` üretilmez. Yurtiçi yalnızca bu External Barkod API'dedir.
 
 ExpressAI barkod API'sini kullanarak sipariş barkodlarınızı programatik olarak alın. PDF, görsel, JSON veya ZPL formatlarında.
 
@@ -56,7 +58,7 @@ POST https://expressai.com.tr/api/external-barcodes/{accountId}
 | `rawJson` | Parse edilmiş kargo bilgileri (JSON formatında) |
 | `zpl` | Ham ZPL kodları (Zebra yazıcılar için) |
 
-**DHL eCommerce:** Barkod etiketten ayrıştırılmaz. Görsel doğrudan ZPL'den üretilir ve dosya yolu `base64BarcodePath` alanına yazılır. Bu siparişlerde `pdf`, `image` ve `zpl` döner; `rawJson` üretilmez. Kolay Gelsin siparişlerinde `pdf`, `image`, `rawJson` ve `zpl` aynı şekilde çalışmaya devam eder.
+**Kolay Gelsin** `pdf`, `image`, `rawJson` ve `zpl` üretir. **DHL eCommerce** barkodu etiketten ayrıştırılmaz; görsel doğrudan ZPL'den üretilir ve dosya yolu `base64BarcodePath` alanına yazılır. `pdf`, `image` ve `zpl` döner, `rawJson` üretilmez. **Yurtiçi** barkodu da ayrıştırılmaz; görsel ZPL'den birleşik etiket olarak üretilir ve yolu `base64BarcodePath` alanına yazılır. `pdf`, `image` ve `zpl` döner, `rawJson` üretilmez. Yurtiçi yalnızca External Barkod API'dedir.
 
 ## Response Formatları
 
